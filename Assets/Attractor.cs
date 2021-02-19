@@ -5,9 +5,9 @@ using UnityEngine;
 [RequireComponent(typeof(CircleCollider2D))]
 public class Attractor : MonoBehaviour
 {
-    const float G = 6.67408e-11f;
-    [SerializeField]float attractorMass = 100000f;
     HashSet<Rigidbody2D> rigidbodies;
+    LineRenderer lineRenderer;
+    [SerializeField]private float attractionForce;
 
     private void Start()
     {
@@ -39,29 +39,13 @@ public class Attractor : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Cache the position
-        var currentPosition = (Vector2)transform.position;
-
-        // Apply force to all rigidbodies
-        foreach (var body in rigidbodies)
+       foreach(var rb in rigidbodies)
         {
-            // Calculate the magnitude of the force by the rigidbody mass and the attractor force
-            float distance = Vector2.Distance(transform.parent.position, body.transform.position);
-            float forceMagnitude = (G * attractorMass) / Mathf.Pow(distance, 2);
-
-            // Calculate the force by getting the delta position with the previously calculated magnitude
-            var force = -GetDirection(body, currentPosition) * forceMagnitude;
-
-            // Apply
-            body.AddForce(force);
+            var direction = (transform.position - rb.transform.position).normalized;
+            var forceVector = direction * attractionForce;
+            rb.AddForce(forceVector);
         }
     }
 
-    //Get the relative position of body opposing to the point
-    static Vector2 GetDirection(Rigidbody2D body, Vector2 point)
-    {
-        // Calculate the delta position
-        var delta = body.position - point;
-        return delta.normalized;
-    }
+    
 }
